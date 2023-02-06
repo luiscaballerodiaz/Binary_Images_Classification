@@ -7,7 +7,6 @@ from keras import layers
 from keras import models
 from keras import optimizers
 from keras.preprocessing import image
-import sys
 
 
 train_dir, test_dir, validation_dir = utils.create_working_folders(base_dir=os.path.join(os.getcwd(), 'Images'),
