@@ -3,6 +3,7 @@ import shutil
 
 
 def create_working_folders(base_dir, validation_size, test_size):
+    """Split the input images in train, validation and test sets and store the images in the corresponding folders"""
     train_dir = os.path.join(base_dir, 'Train')
     train_cars_dir = os.path.join(train_dir, 'Cars')
     train_bikes_dir = os.path.join(train_dir, 'Bikes')
