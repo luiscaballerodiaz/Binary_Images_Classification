@@ -25,12 +25,12 @@ class DataPlot:
         for i in range(self.images_row * self.images_column):
             im = cv2.imread(fnames[i], cv2.IMREAD_UNCHANGED)
             im = cv2.cvtColor(im, cv2.COLOR_BGR2RGBA)
-            im = cv2.resize(im, (image_width, image_height), interpolation=cv2.INTER_AREA)
+            im = cv2.resize(im, (image_width, image_height), interpolation=cv2.INTER_LINEAR)
             im_array[i, :, :, :] = im
             ax[i].imshow(im)
-        fig.suptitle('EXAMPLE FOR ' + folder.upper() + ' IMAGES', fontweight='bold', fontsize=24)
+        fig.suptitle('EXAMPLE FOR ' + folder + ' IMAGES', fontweight='bold', fontsize=24)
         fig.tight_layout()
-        plt.savefig('Example for ' + folder.upper() + ' images.png', bbox_inches='tight')
+        plt.savefig('Example for ' + folder + ' images.png', bbox_inches='tight')
         plt.close()
         return im_array
 
@@ -41,28 +41,43 @@ class DataPlot:
         ax = axes.ravel()
         for i, batch in zip(range(self.images_row * self.images_column), image_generator.flow(im, batch_size=1)):
             ax[i].imshow(batch[0, :, :, :])
-        fig.suptitle('EXAMPLE FOR ' + description.upper(), fontweight='bold', fontsize=24)
+        fig.suptitle('EXAMPLE FOR ' + description, fontweight='bold', fontsize=24)
         fig.tight_layout()
-        plt.savefig('Example for ' + description.upper() + '.png', bbox_inches='tight')
+        plt.savefig('Example for ' + description + '.png', bbox_inches='tight')
         plt.close()
 
-    def plot_results(self, trainval, testval, test, description):
+    def plot_results(self, trainval, description, tag, testval=0, folds=0):
         """Plot the accuracy results for train and validation sets per each epoch"""
-        fig, axes = plt.subplots(1, 1, figsize=(self.fig_width, self.fig_height))
-        test_str = ''
         cmap = cm.get_cmap('tab10')
         colors = cmap.colors
-        for i in range(len(trainval)):
-            plt.plot(range(1, len(trainval[i]) + 1), trainval[i], ls='-', lw=2, color=colors[i % len(colors)],
-                     label='Training acc fold ' + str(i + 1))
-            plt.plot(range(1, len(testval[i]) + 1), testval[i],  ls='--', lw=2, color=colors[i % len(colors)],
-                     label='Validation acc fold ' + str(i + 1))
-            test_str += '\nTEST ACCURACY MODEL FOLD ' + str(i + 1) + ' = ' + str(round(test[i], 2))
-        plt.title('ACCURACY RESULTS ' + description.upper() + test_str, fontweight='bold', fontsize=20)
+        fig, axes = plt.subplots(1, 1, figsize=(self.fig_width, self.fig_height))
+        if folds == 0:
+            plt.plot(range(1, len(trainval) + 1), trainval, ls='-', lw=2, color='blue', label='Full Training ' + tag)
+            text_str = '\nFULL TRAINING ' + tag.upper() + ' = ' + str(round(trainval[-1], 4))
+        else:
+            for i in range(len(trainval)):
+                mess = 'split ' + str(i + 1)
+                plt.plot(range(1, len(trainval[i]) + 1), trainval[i], ls='-', lw=2, color=colors[i % len(colors)],
+                         label='Training ' + mess + ' ' + tag)
+                plt.plot(range(1, len(testval[i]) + 1), testval[i],  ls='--', lw=2, color=colors[i % len(colors)],
+                         label='Validation ' + mess + ' ' + tag)
+            text_str = ''
+            sum_trainval = 0
+            sum_testval = 0
+            for i in range(len(trainval)):
+                if i < folds:
+                    sum_trainval += trainval[i][-1]
+                    sum_testval += testval[i][-1]
+                    text_str += '\nSPLIT ' + str(i + 1) + ': TRAINING ' + tag.upper() + ' = ' + \
+                                str(round(trainval[i][-1], 4)) + ' and VALIDATION ' + tag.upper() + ' = ' + \
+                                str(round(testval[i][-1], 4))
+            text_str += '\nAVERAGE SPLIT TRAINING ' + tag.upper() + ' = ' + str(round(sum_trainval / len(trainval), 4))
+            text_str += '\nAVERAGE SPLIT VALIDATION ' + tag.upper() + ' = ' + str(round(sum_testval / len(testval), 4))
+        plt.title(tag.upper() + ' RESULTS ' + description.upper() + text_str, fontweight='bold', fontsize=20)
         plt.legend()
         plt.grid()
         fig.tight_layout()
-        plt.savefig('Accuracy results ' + description.upper() + '.png', bbox_inches='tight')
+        plt.savefig(tag.title() + ' validation results ' + description + '.png', bbox_inches='tight')
         plt.close()
 
     def plot_activation_convnet(self, model, image, label):
