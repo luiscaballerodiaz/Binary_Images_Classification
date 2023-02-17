@@ -18,6 +18,7 @@ batch_norm_flag = True
 image_width = 150
 image_height = 150
 folds = 4
+test_size = 0.25
 learning_rate = 0.001
 batch_size = 20
 epochs = 250
@@ -30,7 +31,7 @@ models_to_load = ['Fold1 - Trained model data augmentation and batch normalizati
                   'Fold4 - Trained model data augmentation and batch normalization.h5']
 
 base_dir = os.path.join(os.getcwd(), 'Images')
-split = DataSplit(base_dir, folds)
+split = DataSplit(base_dir, folds, test_size)
 visualization = DataPlot()
 if avoid_overfit:
     description = 'data augmentation'
@@ -78,7 +79,7 @@ if model_action == 0:
         if results[i][1] > maxim:
             maxim = results[i][1]
             ind = i
-        print('TEST LOSS AND TEST ACCURACY {}: {} and {}\n'.format(models_to_load[i], results[i][0], results[i][1]))
+
     model = models_list[ind]
     # Visualize model outputs
     visualization.plot_activation_convnet(model, bike_images[1, :, :, :], 'Bike')
@@ -86,6 +87,9 @@ if model_action == 0:
     # Ensemble all models and check test accuracy
     ensembled_acc = utils.ensemble_models(models_to_load, train_bikes_dir, train_cars_dir, test_bikes_dir, test_cars_dir)
     print('TEST ACCURACY FOR THE ENSEMBLED MODEL: {}'.format(ensembled_acc))
+    for i in range(len(results)):
+        print('TEST LOSS AND TEST ACCURACY {}: {} and {}\n'.format(models_to_load[i], round(results[i][0], 4),
+                                                                   round(results[i][1], 4)))
 
 elif model_action == 1:
     # Create neural network model based on sequential layers and training it applying fold cross validation

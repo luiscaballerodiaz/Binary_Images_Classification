@@ -47,7 +47,7 @@ def ensemble_models(models_input, train_dir_class0, train_dir_class1, test_dir_c
     y_pred_test, y_true_test = make_predictions(models_list, test_dir_class0, test_dir_class1,
                                                 image_width, image_height)
     test_acc = 100
-    for i in range(1000):
+    for i in range(10000):
         weights_ini = np.random.rand(len(models_list))
         weights_ini /= np.sum(weights_ini)
         opt_weights = minimize(fun=maximize_acc,

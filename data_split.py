@@ -4,10 +4,11 @@ import random
 
 
 class DataSplit:
-    def __init__(self, base_dir, folds):
+    def __init__(self, base_dir, folds, test_size):
         self.base_dir = base_dir
         self.folds = folds
-        self.test_size = 1 / folds
+        self.split_size = 1 / folds
+        self.test_size = test_size
         self.base_cars_dir = os.path.join(base_dir, 'Cars')
         self.base_bikes_dir = os.path.join(base_dir, 'Bikes')
         self.ncars = os.listdir(self.base_cars_dir)
@@ -87,16 +88,16 @@ class DataSplit:
                 os.mkdir(testval_cars_dir)
                 os.mkdir(testval_bikes_dir)
                 for fname, j in zip(self.train_nbikes, range(round(len(self.train_nbikes)))):
-                    if (i * round(len(self.train_nbikes) * self.test_size)) <= j < \
-                            ((i + 1) * round(len(self.train_nbikes) * self.test_size)):
+                    if (i * round(len(self.train_nbikes) * self.split_size)) <= j < \
+                            ((i + 1) * round(len(self.train_nbikes) * self.split_size)):
                         dst = os.path.join(testval_bikes_dir, fname)
                     else:
                         dst = os.path.join(trainval_bikes_dir, fname)
                     src = os.path.join(self.base_bikes_dir, fname)
                     shutil.copyfile(src, dst)
                 for fname, j in zip(self.train_ncars, range(round(len(self.train_ncars)))):
-                    if (i * round(len(self.train_ncars) * self.test_size)) <= j < \
-                            ((i + 1) * round(len(self.train_ncars) * self.test_size)):
+                    if (i * round(len(self.train_ncars) * self.split_size)) <= j < \
+                            ((i + 1) * round(len(self.train_ncars) * self.split_size)):
                         dst = os.path.join(testval_cars_dir, fname)
                     else:
                         dst = os.path.join(trainval_cars_dir, fname)
